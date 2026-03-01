@@ -1,0 +1,6 @@
+tf_env/
+venv/
+__pycache__/
+.idea/
+.ipynb_checkpoints/
+*.pyc
