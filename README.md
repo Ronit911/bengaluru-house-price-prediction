@@ -9,7 +9,7 @@ A high-performance machine learning application that predicts real estate prices
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 - **Accurate Predictions**: Uses a Ridge Regression model trained on 13,000+ records.
 - **Premium UI**: Modern glassmorphic interface with interactive location search.
 - **Developer Friendly**: Fully type-hinted Python backend with Google-style docstrings.
@@ -17,7 +17,7 @@ A high-performance machine learning application that predicts real estate prices
 
 ---
 
-## 🏗️ Project Architecture
+##  Project Architecture
 
 ```mermaid
 graph TD
@@ -32,7 +32,7 @@ graph TD
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **Frontend**: Vanilla CSS (Glassmorphism), HTML5, Jinja2.
 - **Backend**: Flask, Python 3.
 - **ML Engine**: Scikit-Learn (Ridge Regression), Pandas, NumPy.
@@ -40,7 +40,7 @@ graph TD
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Python 3.8+
@@ -66,7 +66,7 @@ graph TD
 
 ---
 
-## 📈 Model Insights
+##  Model Insights
 - **Algorithm**: Ridge Regression (L2 Regularization)
 - **R² Score**: 0.86
 - **RMSE**: 34.06 (Lakhs)
@@ -74,7 +74,7 @@ graph TD
 
 ---
 
-## 👨‍💻 Lessons Learned
+##  Lessons Learned
 As my first ML project, I learned the importance of **Data Quality** over model complexity. Handling outliers in the Bengaluru dataset was crucial for moving from 72% to 86% accuracy. I also gained experience in bridging the gap between a raw model and a production-ready web application.
 
 ---
