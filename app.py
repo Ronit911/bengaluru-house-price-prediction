@@ -1,51 +1,75 @@
 import pandas as pd
-from flask import Flask, render_template, request
-import pickle
+import logging
+from flask import Flask, request, render_template, jsonify
+from src.predict import predict_price
+from src.utils import format_price, price_category
+from src.preprocess import validate_input
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-data = pd.read_csv('data/Clean_data.csv')
-pipe = pickle.load(open('model/RidgeModel.pkl','rb'))
 
-
-def format_price(price_lakh):
-    if price_lakh >= 100:
-        return f" {price_lakh/100:.2f} Cr"
-    else:
-        return f" {price_lakh:.2f} Lakhs"
+# Load unique locations once at startup
+try:
+    df = pd.read_csv('data/Clean_data.csv')
+    LOCATIONS = sorted(df['location'].unique().tolist())
+    logger.info(f"Loaded {len(LOCATIONS)} unique locations.")
+except Exception as e:
+    logger.warning(f"Error loading locations: {e}. Using empty list.")
+    LOCATIONS = []
 
 
 @app.route('/')
-def index():
-    locations = sorted(data['location'].unique())
-    return render_template('index.html', locations=locations)
+def home():
+    return render_template('index.html', locations=LOCATIONS)
 
 
 @app.route('/predict', methods=['POST'])
 def predict():
-
     try:
-        location = request.form.get('location')
-        bhk = int(request.form.get('BHK'))
-        bath = float(request.form.get('bath'))
-        sqft = float(request.form.get('total_sqft'))
+        location = request.form['location']
+        sqft = float(request.form['sqft'])
+        bath = int(request.form['bath'])
+        bhk = int(request.form['bhk'])
 
-        input_df = pd.DataFrame({
-            'location':[location],
-            'total_sqft':[sqft],
-            'bath':[bath],
-            'bhk':[bhk]
-        })
+        valid, error = validate_input(location, sqft, bath, bhk)
 
-        prediction = pipe.predict(input_df)[0]
+        if not valid:
+            return render_template('index.html', prediction_text=error, locations=LOCATIONS)
 
-        formatted_price = format_price(prediction)
+        price = predict_price(location, sqft, bath, bhk)
 
-        return formatted_price
+        formatted_price = format_price(price)
+        category = price_category(price)
 
+        result = f"{formatted_price} ({category})"
+        logger.info(f"Prediction for {location}, {sqft}sqft: {result}")
+
+        return render_template('index.html', prediction_text=result, locations=LOCATIONS)
     except Exception as e:
-        print("ERROR:", e)
-        return str(e)
+        logger.error(f"Error during prediction: {e}")
+        return render_template('index.html', prediction_text="An error occurred. Please check your inputs.", locations=LOCATIONS)
 
 
-if __name__ == '__main__':
+# 🔥 API endpoint (IMPORTANT FOR RESUME)
+@app.route('/predict_api', methods=['POST'])
+def predict_api():
+    data = request.get_json()
+
+    price = predict_price(
+        data['location'],
+        data['total_sqft'],
+        data['bath'],
+        data['bhk']
+    )
+
+    return jsonify({
+        "predicted_price_lakhs": round(price, 2),
+        "category": price_category(price)
+    })
+
+
+if __name__ == "__main__":
     app.run(debug=True)
